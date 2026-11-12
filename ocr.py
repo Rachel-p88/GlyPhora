@@ -1,4 +1,3 @@
-"""Tesseract 5 LSTM engine (CPU, local, no paid API). Raw transcription, never autocorrected."""
 import os, shutil, pytesseract
 from pytesseract import Output
 
@@ -12,7 +11,7 @@ _locate()
 TESSDATA = os.environ.get("GLYPHORA_TESSDATA")
 
 def extract(gray, psm=3):
-    if TESSDATA: os.environ["TESSDATA_PREFIX"] = TESSDATA  # works with spaces; folder must contain eng.traineddata
+    if TESSDATA: os.environ["TESSDATA_PREFIX"] = TESSDATA
     d = pytesseract.image_to_data(gray, config=f"--oem 1 --psm {psm}", output_type=Output.DICT)
     lines, key, cur, par = [], None, [], None
     for i, t in enumerate(d["text"]):
