@@ -1,4 +1,3 @@
-"""Adaptive document restoration. Returns (restored_bgr, steps). Never mutates input."""
 import cv2, numpy as np
 
 def analyze(gray):
@@ -9,7 +8,6 @@ def analyze(gray):
                 noise=float(np.median(np.abs(gray.astype(np.float32) - cv2.GaussianBlur(gray, (0, 0), 1.5)))))
 
 def is_document(gray):
-    """True when most pixels are plain paper background (text on a light page), not a photograph."""
     sm = cv2.resize(gray, None, fx=.25, fy=.25, interpolation=cv2.INTER_AREA)
     bg = cv2.morphologyEx(sm, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15)))
     return float(((bg.astype(np.int16) - sm) < 35).mean()) > 0.70 and np.median(sm) > 130
@@ -94,15 +92,12 @@ def deskew(img):
 
 
 def flatten(img):
-    """Divide by estimated background to remove shadows/uneven light."""
     k = max(31, (min(img.shape[:2]) // 20) | 1)
     bg = cv2.morphologyEx(img, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k)))
     bg = cv2.GaussianBlur(bg, (0, 0), k / 3)
     return cv2.divide(img, bg, scale=240)
 
 SHARP_FLOOR = 0.0
-# Ablation on real HCCD images (20/condition): sharpen and CLAHE raised MSE on blur images and gave no
-# measurable benefit elsewhere, so both are off unless requested. Flatten and brightness normalization helped.
 DEFAULT_SKIP = frozenset({"sharpen", "clahe"})
 
 def stretch(g):
@@ -113,10 +108,9 @@ def restore(img, do_deskew=True, skip=DEFAULT_SKIP):
     steps = []
     out = img.copy()
     g0 = cv2.cvtColor(out, cv2.COLOR_BGR2GRAY)
-    # Document gate is evaluated on a brightness-stretched copy so dark (low-light) pages are not mistaken for photos.
     if not is_document(stretch(g0)): return out, ["not a text-on-paper page: preserved"]
     p95 = float(np.percentile(g0, 95))
-    if p95 < 190 and "brightness" not in skip:  # under-exposed: scale paper brightness up
+    if p95 < 190 and "brightness" not in skip:
         out = np.clip(out.astype(np.float32) * (235.0 / max(p95, 1)), 0, 255).astype(np.uint8)
         steps.append("brightness normalization")
     g0 = cv2.cvtColor(out, cv2.COLOR_BGR2GRAY)
@@ -129,18 +123,16 @@ def restore(img, do_deskew=True, skip=DEFAULT_SKIP):
     if "denoise" not in skip and a["noise"] > 2.2 and a["sharp"] < 3000:
         out = cv2.fastNlMeansDenoisingColored(out, None, 4, 4, 7, 21); steps.append("denoise")
     g2 = cv2.cvtColor(out, cv2.COLOR_BGR2GRAY)
-    if "clahe" not in skip and np.percentile(g2, 95) - np.percentile(g2, 2) < 80:  # low dynamic range only
+    if "clahe" not in skip and np.percentile(g2, 95) - np.percentile(g2, 2) < 80:
         l, A, B = cv2.split(cv2.cvtColor(out, cv2.COLOR_BGR2LAB))
         l = cv2.createCLAHE(2.0, (8, 8)).apply(l)
         out = cv2.cvtColor(cv2.merge([l, A, B]), cv2.COLOR_LAB2BGR); steps.append("local contrast (CLAHE)")
-    # Unsharp mask helps light/moderate blur; very strong blur cannot be recovered by filtering and is left alone.
     if "sharpen" not in skip and a["sharp"] < 150 and a["sharp"] > SHARP_FLOOR:
         out = cv2.addWeighted(out, 2.5, cv2.GaussianBlur(out, (0, 0), 2.0), -1.5, 0); steps.append("sharpen")
     if not steps: steps.append("already clear: preserved")
     return out, steps
 
 def ocr_prep(img, target_w=2000):
-    """OCR-only representation (grayscale, normalised, resized). Never shown to users."""
     g = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if img.ndim == 3 else img
     s = target_w / g.shape[1]
     if s > 1.15 or s < 0.7:
@@ -155,13 +147,11 @@ def _glyph_height(g):
     return float(np.median(hs)) if hs else None
 
 def lighting_unevenness(g):
-    """Std-dev of the estimated paper background (same measure the restorer uses for shadows)."""
     return float(cv2.medianBlur(cv2.resize(g, None, fx=.25, fy=.25), 31).std())
 
 def ocr_prep_scaled(img, target=36, bgnorm="auto", binarize=False, lanczos=True):
-    """OCR-only copy scaled so the median glyph is ~target px tall (Tesseract works best near 25-35 px)."""
     g = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if img.ndim == 3 else img
-    if bgnorm == "auto": bgnorm = lighting_unevenness(g) > 12   # normalise only when lighting is uneven
+    if bgnorm == "auto": bgnorm = lighting_unevenness(g) > 12 
     if bgnorm:
         k = max(31, (min(g.shape) // 25) | 1)
         bg = cv2.GaussianBlur(cv2.morphologyEx(g, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k))), (0, 0), k / 3)
