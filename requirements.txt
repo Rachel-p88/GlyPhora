@@ -1,0 +1,10 @@
+fastapi>=0.110
+uvicorn>=0.29
+python-multipart>=0.0.9
+opencv-python-headless>=4.9
+numpy
+pillow
+pytesseract>=0.3.10
+pytest
+httpx
+scikit-image
