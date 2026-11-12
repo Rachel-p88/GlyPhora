@@ -1,6 +1,3 @@
-
-"""FastAPI layer for Glyphora image restoration and OCR."""
-
 import base64
 import io
 import os
