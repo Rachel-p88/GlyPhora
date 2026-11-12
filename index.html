@@ -1,0 +1,735 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glyphora | Document Restoration</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --green: #286747;
+    --green-dark: #194D35;
+    --green-hover: #20563C;
+    --sage: #EAF1E9;
+    --sage-light: #F3F6F0;
+    --cream: #FAF9F5;
+    --white: #FFFFFF;
+    --text: #26372E;
+    --muted: #78847A;
+    --border: #E5E9DF;
+    --shadow: 0 8px 30px rgba(36, 66, 45, 0.055);
+    --shadow-hover: 0 12px 35px rgba(36, 66, 45, 0.10);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    background: var(--cream);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+}
+
+/* HEADER */
+
+header {
+    height: 76px;
+    padding: 0 7%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.94);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(14px);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    color: var(--green-dark);
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.brand-mark {
+    width: 37px;
+    height: 37px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: var(--green);
+    color: white;
+    font-size: 21px;
+    font-weight: 700;
+}
+
+.brand small {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    font-weight: 600;
+    line-height: 1;
+    margin-top: 2px;
+}
+
+/* MAIN */
+
+main {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 64px 28px 85px;
+}
+
+.hero {
+    text-align: center;
+    margin-bottom: 43px;
+}
+
+.eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--sage);
+    color: var(--green-dark);
+    border-radius: 30px;
+    padding: 7px 15px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+    margin-bottom: 19px;
+}
+
+.eyebrow span {
+    width: 7px;
+    height: 7px;
+    background: #6D9D76;
+    border-radius: 50%;
+}
+
+h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(34px, 5vw, 49px);
+    line-height: 1.18;
+    letter-spacing: -1.3px;
+    color: var(--green-dark);
+    margin: 0 auto 17px;
+    max-width: 750px;
+}
+
+h1 em {
+    color: #6D9577;
+    font-style: normal;
+}
+
+p.s {
+    max-width: 650px;
+    margin: 0 auto;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.9;
+}
+
+/* WORKSPACE */
+
+.workspace {
+    max-width: 900px;
+    margin: 0 auto;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 19px;
+    padding: 28px;
+    box-shadow: var(--shadow);
+}
+
+.workspace-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 19px;
+    gap: 12px;
+}
+
+.workspace-heading h2 {
+    font-size: 17px;
+    color: var(--green-dark);
+    margin: 0;
+    font-weight: 700;
+}
+
+.workspace-heading span {
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--sage-light);
+    padding: 6px 11px;
+    border-radius: 20px;
+}
+
+/* UPLOAD */
+
+.drop {
+    border: 1.5px dashed #B9CCB9;
+    background: #F7F9F4;
+    border-radius: 14px;
+    padding: 43px 20px;
+    text-align: center;
+    margin: 0;
+    transition: .25s;
+}
+
+.drop:hover {
+    border-color: var(--green);
+    background: #F0F5EE;
+}
+
+.drop.dragover {
+    border-color: var(--green);
+    background: #E6EFE4;
+    box-shadow: inset 0 0 0 3px rgba(40,103,71,.12);
+}
+
+.upload-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    margin: 0 auto 15px;
+    display: grid;
+    place-items: center;
+    background: #E6EFE4;
+    color: var(--green);
+    font-size: 25px;
+}
+
+.drop h3 {
+    color: var(--green-dark);
+    font-size: 16px;
+    margin: 0 0 5px;
+}
+
+.drop p {
+    color: var(--muted);
+    font-size: 12px;
+    margin: 0 0 19px;
+}
+
+input[type=file] {
+    max-width: 100%;
+    font: inherit;
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0 auto 18px;
+}
+
+input[type=file]::file-selector-button {
+    border: 1px solid #D8E3D6;
+    border-radius: 7px;
+    padding: 9px 13px;
+    background: white;
+    color: var(--green-dark);
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+button, .btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 9px;
+    padding: 11px 23px;
+    font: 600 13px 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: .22s ease;
+    box-shadow: 0 3px 9px rgba(40,103,71,.12);
+}
+
+button:hover, .btn:hover {
+    background: var(--green-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(40,103,71,.19);
+}
+
+button:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+button:focus-visible, a:focus-visible, input:focus-visible {
+    outline: 3px solid #B6D3B8;
+    outline-offset: 3px;
+}
+
+/* THUMBNAILS */
+
+.thumbs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(86px, 1fr));
+    gap: 10px;
+    margin: 0 0 16px;
+    text-align: left;
+}
+
+.thumbs:empty {
+    display: none;
+}
+
+.thumb {
+    position: relative;
+    aspect-ratio: 1;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: #F8F8F5;
+}
+
+.thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.thumb button {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 13px;
+    line-height: 1;
+    background: rgba(25,77,53,.85);
+    box-shadow: none;
+}
+
+.thumb-count {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.thumb-count button {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 5px 11px;
+    font-size: 11px;
+    background: white;
+    color: var(--green-dark);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+}
+
+/* RESULTS */
+
+#out {
+    margin-top: 25px;
+}
+
+.card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    padding: 22px;
+    margin: 18px 0;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 19px;
+}
+
+.grid > div {
+    min-width: 0;
+    color: var(--green-dark);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.grid img {
+    width: 100%;
+    max-height: 440px;
+    object-fit: contain;
+    margin-top: 11px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #F8F8F5;
+    padding: 5px;
+}
+
+textarea {
+    width: 100%;
+    min-height: 210px;
+    margin: 20px 0 14px;
+    padding: 17px;
+    resize: vertical;
+    font: 13px/1.8 'DM Sans', sans-serif;
+    color: #425347;
+    background: #F8F9F5;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+}
+
+.card button {
+    margin: 4px 5px 4px 0;
+}
+
+.err {
+    color: #B54747;
+    font-size: 13px;
+    margin-top: 12px;
+}
+
+/* FOOTER */
+
+footer {
+    text-align: center;
+    border-top: 1px solid var(--border);
+    padding: 28px 20px;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: .2px;
+    background: #F7F7F1;
+}
+
+footer strong {
+    color: var(--green-dark);
+}
+
+/* RESPONSIVE */
+
+@media(max-width:700px) {
+    header {
+        padding: 0 18px;
+        height: auto;
+        min-height: 72px;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+
+    .brand {
+        font-size: 21px;
+    }
+
+    main {
+        padding: 43px 16px 60px;
+    }
+
+    .hero {
+        margin-bottom: 30px;
+    }
+
+    .workspace {
+        padding: 17px;
+        border-radius: 14px;
+    }
+
+    .drop {
+        padding: 32px 13px;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .card {
+        padding: 15px;
+    }
+
+    .workspace-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .drop input[type=file] {
+        width: 100%;
+    }
+}
+
+@media(prefers-reduced-motion:reduce) {
+    *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="brand">
+        <div class="brand-mark">G</div>
+        <div>
+            Glyphora
+            <small>DOCUMENT INTELLIGENCE</small>
+        </div>
+    </div>
+</header>
+
+<main>
+
+<section id="img">
+
+    <div class="hero">
+        <div class="eyebrow"><span></span> Intelligent Document Restoration</div>
+        <h1>Bring faded documents <em>back to life.</em></h1>
+        <p class="s">
+            Restore degraded document images and extract readable text.
+            Transform blurry, faded and stained documents into clearer,
+            more accessible information.
+        </p>
+    </div>
+
+    <div class="workspace">
+
+        <div class="workspace-heading">
+            <h2>Image Restoration Workspace</h2>
+            <span>PNG · JPG · WEBP</span>
+        </div>
+
+        <div class="drop">
+
+            <div class="upload-icon">↑</div>
+
+            <h3>Upload your documents</h3>
+
+            <p>
+                Select or drag &amp; drop one or more images to begin restoring your documents.
+                Up to 20 images · 15 MB each.
+            </p>
+
+            <input id="f" type="file" accept="image/*" multiple>
+
+            <div id="thumbs" class="thumbs"></div>
+            <div id="msg" class="err" style="margin:0 0 14px"></div>
+
+            <br>
+
+            <button id="go">Restore Documents →</button>
+
+        </div>
+
+    </div>
+
+    <div id="out"></div>
+
+</section>
+
+</main>
+
+<footer>
+    <strong>Glyphora</strong> · Intelligent Document Restoration
+    <br><br>
+</footer>
+
+<script>
+const $=s=>document.querySelector(s);
+
+/* ===== MULTI-SELECT + DRAG & DROP (image section) ===== */
+
+const MAX_FILES = 20, MAX_MB = 15;
+let sel = [];
+let thumbUrls = [];
+const fkey = f => f.name + '|' + f.size + '|' + f.lastModified;
+
+function syncInput() {
+    const dt = new DataTransfer();
+    sel.forEach(f => dt.items.add(f));
+    $('#f').files = dt.files;
+    renderThumbs();
+}
+
+function renderThumbs() {
+    thumbUrls.forEach(u => URL.revokeObjectURL(u));
+    thumbUrls = [];
+    const box = $('#thumbs');
+    box.innerHTML = '';
+    if (!sel.length) return;
+
+    const head = document.createElement('div');
+    head.className = 'thumb-count';
+    head.innerHTML = `<span>${sel.length} of ${MAX_FILES} selected</span>`;
+    const clr = Object.assign(document.createElement('button'), {
+        textContent: 'Clear all', type: 'button',
+        onclick: () => { sel = []; $('#msg').textContent = ''; syncInput(); }
+    });
+    head.append(clr);
+    box.append(head);
+
+    sel.forEach((f, i) => {
+        const url = URL.createObjectURL(f);
+        thumbUrls.push(url);
+        const t = document.createElement('div');
+        t.className = 'thumb';
+        t.title = f.name;
+        const img = Object.assign(document.createElement('img'), { src: url, alt: f.name });
+        const x = Object.assign(document.createElement('button'), {
+            textContent: '×', type: 'button', title: 'Remove',
+            onclick: () => { sel.splice(i, 1); syncInput(); }
+        });
+        t.append(img, x);
+        box.append(t);
+    });
+}
+
+function addFiles(list) {
+    const msgs = [];
+    for (const f of list) {
+        if (!f.type.startsWith('image/')) { msgs.push(`${f.name}: not an image`); continue; }
+        if (f.size > MAX_MB * 1024 * 1024) { msgs.push(`${f.name}: over ${MAX_MB} MB`); continue; }
+        if (sel.some(x => fkey(x) === fkey(f))) continue;
+        if (sel.length >= MAX_FILES) { msgs.push(`Limit of ${MAX_FILES} images reached`); break; }
+        sel.push(f);
+    }
+    $('#msg').textContent = msgs.join(' · ');
+    syncInput();
+}
+
+// File picker: add to the list instead of replacing it.
+$('#f').addEventListener('change', () => addFiles([...$('#f').files]));
+
+// Drag & drop onto the image upload box
+const dz = $('#img .drop');
+['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => {
+    e.preventDefault();
+    dz.classList.add('dragover');
+}));
+['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => {
+    e.preventDefault();
+    if (ev === 'dragleave' && dz.contains(e.relatedTarget)) return;
+    dz.classList.remove('dragover');
+}));
+dz.addEventListener('drop', e => addFiles([...e.dataTransfer.files]));
+
+// Stop the browser from opening a file dropped outside the box
+['dragover', 'drop'].forEach(ev => window.addEventListener(ev, e => e.preventDefault()));
+
+/* ===== IMAGE PROCESSING CODE (unchanged) ===== */
+
+const dl=(blob,n)=>{
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=n;
+    a.click();
+};
+
+$('#go').onclick=async()=>{
+    const fs=[...$('#f').files];
+    if(!fs.length)return;
+
+    $('#go').disabled=true;
+    $('#out').innerHTML='';
+
+    for(const f of fs){
+        const c=document.createElement('div');
+        c.className='card';
+        c.textContent=f.name+' — processing…';
+        $('#out').append(c);
+
+        const fd=new FormData();
+        fd.append('file',f);
+
+        try{
+            const r=await fetch('/api/process',{method:'POST',body:fd});
+            const j=await r.json();
+
+            if(!r.ok)throw Error(j.detail||j.error);
+
+            const src=URL.createObjectURL(f);
+            c.innerHTML='';
+
+            const g=document.createElement('div');
+            g.className='grid';
+
+            g.innerHTML=`<div>Original<br><img src="${src}"></div><div>Restored<br><img src="data:image/png;base64,${j.image_png_b64}"></div>`;
+
+            c.append(g);
+
+            const t=document.createElement('textarea');
+            t.value=j.text||'(no text detected)';
+            t.readOnly=true;
+            c.append(t);
+
+            const b1=Object.assign(document.createElement('button'),{
+                textContent:'Copy text',
+                onclick:()=>navigator.clipboard.writeText(t.value)
+            });
+
+            const b2=Object.assign(document.createElement('button'),{
+                textContent:'Download .txt',
+                onclick:()=>dl(new Blob([t.value],{type:'text/plain;charset=utf-8'}),f.name+'.txt')
+            });
+
+            const b3=Object.assign(document.createElement('button'),{
+                textContent:'Download image',
+                onclick:async()=>dl(await (await fetch('data:image/png;base64,'+j.image_png_b64)).blob(),f.name+'_restored.png')
+            });
+
+            c.append(b1,' ',b2,' ',b3);
+
+            if(j.ocr_error){
+                const e=document.createElement('p');
+                e.className='err';
+                e.textContent=j.ocr_error;
+                c.append(e);
+            }
+
+        }catch(e){
+            c.innerHTML=`${f.name} — <span class="err">Failed: ${e.message}</span>`;
+        }
+    }
+
+    if(fs.length>1){
+        const b=Object.assign(document.createElement('button'),{
+            textContent:'Download all (ZIP)',
+            onclick:async()=>{
+                const fd=new FormData();
+                fs.forEach(f=>fd.append('files',f));
+                dl(await (await fetch('/api/batch',{method:'POST',body:fd})).blob(),'glyphora_results.zip');
+            }
+        });
+        $('#out').append(b);
+    }
+
+    $('#go').disabled=false;
+};
+</script>
+
+</body>
+</html>
