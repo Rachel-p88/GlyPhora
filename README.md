@@ -1,5 +1,4 @@
-# GlyPhora
-# GlyPhora – Adaptive Image Restoration & OCR
+# GlyPhora - Intelligent Document Restoration using IVP & OCR
 
 GlyPhora is a web-based application designed to enhance degraded images and improve document readability. It uses adaptive image processing techniques to identify and address degradation such as blur, poor illumination, and shadows.
 
