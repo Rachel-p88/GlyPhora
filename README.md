@@ -25,7 +25,7 @@ The application also extracts text from images using Tesseract OCR and provides 
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone <https://github.com/Rachel-p88/GlyPhora>
 cd CIVP
 ```
 
@@ -71,4 +71,4 @@ The application is now ready to use!
 
 ---
 
-**Note:** Run the command from the project's root directory, where the `glyphora` folder and `requirements.txt` are located.
+Note: Run the command from the project's root directory, where the `glyphora` folder and `requirements.txt` are located.
