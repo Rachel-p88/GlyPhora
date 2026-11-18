@@ -92,13 +92,72 @@ def deskew(img):
 
 
 def flatten(img):
+    lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+    l, a, b = cv2.split(lab)
+
     k = max(31, (min(img.shape[:2]) // 20) | 1)
-    bg = cv2.morphologyEx(img, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k)))
+
+    bg = cv2.morphologyEx(
+        l,
+        cv2.MORPH_CLOSE,
+        cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k))
+    )
+
     bg = cv2.GaussianBlur(bg, (0, 0), k / 3)
-    return cv2.divide(img, bg, scale=240)
+
+    corrected = cv2.divide(l, bg, scale=200)
+
+    corrected = np.clip(
+        corrected.astype(np.float32),
+        0, 255
+    ).astype(np.uint8)
+
+    return cv2.cvtColor(
+        cv2.merge([corrected, a, b]),
+        cv2.COLOR_LAB2BGR
+    )
+
+def correct_uneven_illumination(img):
+    lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+    l, a, b = cv2.split(lab)
+
+    h, w = l.shape
+    sigma = max(30, min(h, w) // 12)
+
+    background = cv2.GaussianBlur(
+        l,
+        (0, 0),
+        sigmaX=sigma,
+        sigmaY=sigma
+    )
+
+    background = np.maximum(background, 1)
+
+    corrected = cv2.divide(
+        l,
+        background,
+        scale=200
+    )
+
+    corrected = np.clip(
+        corrected,
+        0,
+        255
+    ).astype(np.uint8)
+
+    corrected = cv2.addWeighted(
+        l, 0.35,
+        corrected, 0.65,
+        0
+    )
+
+    return cv2.cvtColor(
+        cv2.merge([corrected, a, b]),
+        cv2.COLOR_LAB2BGR
+    )
 
 SHARP_FLOOR = 0.0
-DEFAULT_SKIP = frozenset({"sharpen", "clahe"})
+DEFAULT_SKIP = frozenset()
 
 def stretch(g):
     lo, hi = np.percentile(g, 1), np.percentile(g, 99)
@@ -108,27 +167,69 @@ def restore(img, do_deskew=True, skip=DEFAULT_SKIP):
     steps = []
     out = img.copy()
     g0 = cv2.cvtColor(out, cv2.COLOR_BGR2GRAY)
-    if not is_document(stretch(g0)): return out, ["not a text-on-paper page: preserved"]
+    document_like = is_document(stretch(g0))
     p95 = float(np.percentile(g0, 95))
-    if p95 < 190 and "brightness" not in skip:
-        out = np.clip(out.astype(np.float32) * (235.0 / max(p95, 1)), 0, 255).astype(np.uint8)
-        steps.append("brightness normalization")
+
+    if p95 < 150 and "brightness" not in skip:
+        factor = min(1.10, 165.0 / max(p95, 1))
+
+        lab = cv2.cvtColor(out, cv2.COLOR_BGR2LAB)
+        l, a_channel, b_channel = cv2.split(lab)
+
+        l = np.clip(
+            l.astype(np.float32) * factor,
+            0, 255
+        ).astype(np.uint8)
+
+        out = cv2.cvtColor(
+            cv2.merge([l, a_channel, b_channel]),
+            cv2.COLOR_LAB2BGR
+        )
+
+        steps.append("mild brightness correction")
     g0 = cv2.cvtColor(out, cv2.COLOR_BGR2GRAY)
     a = analyze(g0)
-    if do_deskew:
+    print("Image analysis:", a)
+    print("Document-like:", document_like)
+    if do_deskew and document_like:
         out, ang = deskew(out)
-        if ang: steps.append(f"deskew {ang:.1f} deg")
-    if "flatten" not in skip and a["shadow"] > 12 and np.percentile(g0, 90) > 170:
-        out = flatten(out); steps.append("illumination correction")
+        if ang:
+            steps.append(f"deskew {ang:.1f} deg")
+    if "flatten" not in skip and a["shadow"] > 18 and (
+        document_like or a["contrast"] < 45
+    ):
+        out = flatten(out)
+        steps.append("illumination correction")
     if "denoise" not in skip and a["noise"] > 2.2 and a["sharp"] < 3000:
         out = cv2.fastNlMeansDenoisingColored(out, None, 4, 4, 7, 21); steps.append("denoise")
     g2 = cv2.cvtColor(out, cv2.COLOR_BGR2GRAY)
-    if "clahe" not in skip and np.percentile(g2, 95) - np.percentile(g2, 2) < 80:
-        l, A, B = cv2.split(cv2.cvtColor(out, cv2.COLOR_BGR2LAB))
-        l = cv2.createCLAHE(2.0, (8, 8)).apply(l)
-        out = cv2.cvtColor(cv2.merge([l, A, B]), cv2.COLOR_LAB2BGR); steps.append("local contrast (CLAHE)")
-    if "sharpen" not in skip and a["sharp"] < 150 and a["sharp"] > SHARP_FLOOR:
-        out = cv2.addWeighted(out, 2.5, cv2.GaussianBlur(out, (0, 0), 2.0), -1.5, 0); steps.append("sharpen")
+    if "clahe" not in skip:
+        lab = cv2.cvtColor(out, cv2.COLOR_BGR2LAB)
+        l, A, B = cv2.split(lab)
+
+        local_contrast = cv2.Laplacian(l, cv2.CV_64F).var()
+
+        if local_contrast < 150:
+            clahe = cv2.createCLAHE(
+                clipLimit=1.5,
+                tileGridSize=(8, 8)
+            )
+
+            enhanced = clahe.apply(l)
+
+            l = cv2.addWeighted(l, 0.65, enhanced, 0.35, 0)
+
+            out = cv2.cvtColor(
+                cv2.merge([l, A, B]),
+                cv2.COLOR_LAB2BGR
+            )
+
+            steps.append("adaptive local contrast")
+
+    if "sharpen" not in skip and 100 < a["sharp"] < 500:
+        blurred = cv2.GaussianBlur(out, (0, 0), 1.0)
+        out = cv2.addWeighted(out, 1.3, blurred, -0.3, 0)
+        steps.append("mild sharpening")
     if not steps: steps.append("already clear: preserved")
     return out, steps
 
@@ -151,13 +252,13 @@ def lighting_unevenness(g):
 
 def ocr_prep_scaled(img, target=36, bgnorm="auto", binarize=False, lanczos=True):
     g = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if img.ndim == 3 else img
-    if bgnorm == "auto": bgnorm = lighting_unevenness(g) > 12 
+    if bgnorm == "auto": bgnorm = lighting_unevenness(g) > 12
     if bgnorm:
         k = max(31, (min(g.shape) // 25) | 1)
         bg = cv2.GaussianBlur(cv2.morphologyEx(g, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k))), (0, 0), k / 3)
         g = cv2.divide(g, bg, scale=245)
     th = _glyph_height(g); s = float(np.clip(target / th, .5, 6)) if th else 1.0
-    s = min(s, max(1.0, 4500 / g.shape[1]))  # keep output <= ~4500 px wide
+    s = min(s, max(1.0, 4500 / g.shape[1]))
     if abs(s - 1) > .1: g = cv2.resize(g, None, fx=s, fy=s, interpolation=(cv2.INTER_LANCZOS4 if lanczos else cv2.INTER_CUBIC) if s > 1 else cv2.INTER_AREA)
     g = cv2.normalize(g, None, 0, 255, cv2.NORM_MINMAX)
     if binarize: g = cv2.threshold(cv2.GaussianBlur(g, (3, 3), 0), 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
